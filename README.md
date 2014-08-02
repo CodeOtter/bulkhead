@@ -21,7 +21,7 @@ npm install bulkhead
 
 An example of a service that handles basic CRUD functionality for Account models:
 
-```
+```javascript
 // AccountService.js
 
 var Service = require('bulkhead');
@@ -38,7 +38,7 @@ Search Functionality
 
 The power of Bulkhead is in the ```.find()``` method.  For example, this will find an account with an ID of 1.  Assuming we've done this:
 
-```
+```javascript
 var accountService = require('./accountService');
 
 // A handler that will display the results of a service action
@@ -49,25 +49,25 @@ var done = function(err, result) {
 
 We can search for accounts by their ID.
 
-```
+```javascript
 accountService.find(1, done);
 ```
 
 This will find an account by its name.
 
-```
+```javascript
 accountService.find('bob', done);
 ```
 
 This will perform a query on the Account model:
 
-```
+```javascript
 accountService.find({ email: 'test@test', password: 'secret' }, done);
 ```
 
 And... you can do all of these searches at the same time via criteria batching. :D
 
-```
+```javascript
 accountService.find([ 1, 'bob', { email: 'test@test', password: 'secret' }], done);
 ```
 
@@ -82,7 +82,7 @@ Let's assume that when we search by a string, we want to search email addresses 
 
 To override this default functionality, we define our criteria map at mixin time:
 
-```
+```javascript
 	Service.call(this, 'Account', {
 	    'number': function(criteria, next) {
 	    	self.getModel.findByAge(criteria, next);
@@ -100,7 +100,7 @@ CRUD Functionality
 
 For the ease of demonstration, lets create some common handlers ahead of time:
 
-```
+```javascript
 // This will generate a standard reponse
 var package = function(err, result) {
 	// Post-save result packaging
@@ -129,7 +129,7 @@ var validation = function(data, next) {
 
 This will allow us to validate a new account, save it to your database, and prepare a result package:
 
-```
+```javascript
 accountService.create({
 	email: 'test@test.com',
 	password: 'secret'
@@ -138,14 +138,15 @@ accountService.create({
 
 This performs an update
 
-```
+```javascript
 accountService.update(1, { 
 	email: 'stillATest@test.com'
 }, validation, package);
 ```
 
 This will perform a mass update:
-```
+
+```javascript
 accountService.update([1, 2, 3, 4, 'test@test.com', 'contact@codeotter.com'] { 
 	email: 'stillATest@test.com'
 }, validation, package);
@@ -153,19 +154,19 @@ accountService.update([1, 2, 3, 4, 'test@test.com', 'contact@codeotter.com'] {
 
 This will delete an account
 
-```
+```javascript
 accountService.remove(1, package);
 ```
 
 This will delete multiple accounts
 
-```
+```javascript
 accountService.remove([1, 2, 3, 4, 'test@test.com', 'contact@codeotter.com'], package);
 ```
 
 This will return the SailsJS ORM Model the service is controlling
 
-```
+```javascript
 accountService.getModel();
 ```
 
@@ -175,7 +176,7 @@ Response Package
 To ease in preserving statefulness between stateless services, (For example, passing jobs AND their arguments into a queue) 
 Bulkhead services should return a Result package.  The ```.result()``` helper assists with this process.  The argument list is as followed:
 
-```
+```javascript
 accountService.result(
 	'The result you want to package',
 	function(err, result) {
@@ -191,7 +192,7 @@ accountService.result(
 
 Generally, your methods will return a positive result, which would look like:
 
-```
+```javascript
 accountService.result(
 	'2',
 	done, 
@@ -201,7 +202,7 @@ accountService.result(
 
 Occasionally messages or additional metadata needs to be attached to the response:
 
-```
+```javascript
 accountService.result(
 	'2',
 	done, 
@@ -212,7 +213,7 @@ accountService.result(
 
 And regarding errors, pass them into the fifth argument:
 
-```
+```javascript
 // An example of a response package with an error
 accountService.result(
 	'3',
@@ -222,3 +223,20 @@ accountService.result(
 	'Invalid mathing'
 );
 ```
+
+Promisification
+---------------
+
+Utilizing Bluebird, all services can be turned into promise generators by doing:
+
+```javascript
+accountService.asPromise()
+```
+
+This only needs to be executed one and the service will create new methods that return promises based on the same name of existing methods 
+(But with a suffix of 'Promise').  So, for example, after running ```accountService.asPromise()```, you'll have access to:
+
+- ```findPromise()```
+- ```createPromise()```
+- ```updatePromise()```
+- ```removePromise()```

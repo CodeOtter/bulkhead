@@ -236,5 +236,22 @@ describe('Service', function() {
 				done();
 			});
 		});
+
+		it('should operate as a promisified object', function(done) {
+			var service = new Service('', {
+				'number': function(criteria, next) {
+					next(null, criteria + 1);
+				}
+			});
+
+			service
+				.asPromise()
+				.findPromise(1)
+				.then(function(result) {
+					assert.ok(result.response() === 2);
+					done();
+				}
+			);
+		});
 	});
 });
