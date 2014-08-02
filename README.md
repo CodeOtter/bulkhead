@@ -24,12 +24,12 @@ An example of a service that handles basic CRUD functionality for Account models
 ```javascript
 // AccountService.js
 
-var Service = require('bulkhead');
+var bulkhead = require('bulkhead');
 
 module.exports = new function() {
 
 	var self = this;
-	Service.call(this, 'Account');
+	bulkhead.service.call(this, 'Account');
 };
 ```
 

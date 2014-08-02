@@ -1,6 +1,6 @@
 {
   "name": "bulkhead",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "description": "Bulkhead is a library that helps programmers create \"units of work\" for SailsJS projects.",
   "main": "index.js",
   "scripts": {
