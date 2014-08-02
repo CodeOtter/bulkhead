@@ -1,7 +1,7 @@
 Bulkhead
 ========
 
-Bulkhead is a framework that helps programmers compartmentalize their SailsJS project into "units of work".
+Bulkhead is a library that helps programmers compartmentalize their SailsJS project into "units of work".
 
 MVC frameworks are inherently incomplete in their approach separation of concern.  Important business logic tends to get distributed randomly between controllers and models.  This makes unit testing, future scaling, and job distribution much more difficult to implement.  To help mitigate this, many MVC frameworks incorporate services as agnostic containers of logic, but these tend to play second fiddle to the more common practice of having the controller wear multiple hats.
 
