@@ -1,0 +1,110 @@
+echo "What is the name of the project?"
+read project
+echo "What is your GitHub username?"
+read username
+curl --silent -u "$username" https://api.github.com/user/repos -d "{\"name\":\"$project\"}" >/dev/null
+git clone git@github.com:$username/$project.git ~/$project
+cd ~/$project
+git init
+
+mkdir api
+mkdir api/services
+cat << EOT > api/services/Service.js
+var Bulkhead = require('bulkhead'),
+	async = require('async');
+
+/**
+ * The main service for the $project project.
+ */
+module.exports = new function(){
+	var self = this;
+	Bulkhead.service.call(self);
+};
+EOT
+
+mkdir test
+cat <<EOT > test/Test.js
+var Suite = require('bulkhead-test'),
+	assert = require('assert');
+
+describe('$project Test', function() {
+	Suite.lift();
+	describe('General test', function() {
+		it('should fail because there is no custom test', function(done) {
+			assert.fail('Please create tests :D');
+		});
+	});
+});
+EOT
+
+cat <<EOT > package.json
+{
+  "name": "$project",
+  "version": "0.0.0",
+  "main": "api/service/Service.js",
+  "description": "A Bulkhead service",
+  "author": "$username",
+  "scripts": {
+    "test": "NODE_ENV=test node_modules/bulkhead-test/node_modules/.bin/mocha test --recursive"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/$username/$project.git"
+  },
+  "license": "GPL v2",
+  "bugs": {
+    "url": "https://github.com/$username/$project/issues"
+  },
+  "homepage": "https://github.com/$username/$project"
+}
+EOT
+
+cat <<EOT > README.md
+$project
+========
+
+A Bulkhead package.
+
+## Installation
+
+\`\`\`
+npm install bulkhead
+\`\`\`
+
+And for SailsJS, in your \`\`\`config/bootstrap.js\`\`\`, replace the default \`\`\`cb()\`\`\` with:
+
+\`\`\`
+require('bulkhead').bootstrap.load(sails, cb)
+\`\`\`
+EOT
+
+npm init
+npm install bulkhead async --save
+npm install bulkhead-test --save-dev
+curl --silent -O https://raw.githubusercontent.com/CodeOtter/bulkhead/master/.gitignore > /dev/null
+curl --silent -O https://raw.githubusercontent.com/CodeOtter/bulkhead/master/LICENSE > /dev/null
+
+git add .
+git commit -m "Boilerplate commit"
+git push origin master
+git checkout -b develop
+git merge master
+git push -u origin develop
+git checkout develop
+
+echo ""
+echo "================================================================================"
+echo "$project has been successfully made.  Your Github project is in a develop branch."
+echo "When you are ready to release your package, push all your changes to develop," 
+echo "then follow these instructions:"
+echo "================================================================================"
+echo "git checkout master"
+echo "git merge develop"
+echo "git push"
+echo "git tag 0.0.0"
+echo "git push --tags"
+echo "npm publish"
+echo "git checkout develop"
+echo "================================================================================"
+echo "You can access your project with:"
+echo "cd ~/$project"

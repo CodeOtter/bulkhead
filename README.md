@@ -33,7 +33,7 @@ module.exports = new function() {
 
 ## Philosophy
 
-MVC frameworks are inherently incomplete in their approach separation of concern.  Important business logic tends to get distributed randomly between controllers and models.  This makes unit testing, future scaling, and job distribution much more difficult to implement.  To help mitigate this, many MVC frameworks incorporate services as agnostic containers of logic, but these tend to play second fiddle to the more common practice of having the controller wear multiple hats.
+MVC frameworks are inherently incomplete in their ways of dealing with separations of concern.  Important business logic tends to get distributed randomly between controllers and models.  This makes unit testing, future scaling, and job distribution much more difficult to implement.  To help mitigate this, many MVC frameworks incorporate services as agnostic containers of logic, but these tend to play second fiddle to the more common practice of having the controller wear multiple hats.
 
 To incentivize service-oriented programming for SailsJS projects, Bulkhead comes with a variety of extremely helpful tools to let people make the switch and quickly reap the rewards.
 
@@ -94,7 +94,7 @@ TestService.remove(1, done);
 // Removes all Persons with an ID of 1, the first name of 'bob', and the last name of 'smith' (Criteria batching)
 TestService.remove([ 1, 'bob', { lastName: 'smith' }], done);
 
-// Creates promise-versions of  the CRUD functionality
+// Creates CRUD methods as promises.
 TestService.asPromise();
 
 // Creates a person with a first name of 'bob' and a last name of 'smith'. (Criteria batching also possible)
@@ -130,6 +130,7 @@ var Bulkhead = require('bulkhead');
 module.exports = new function() {
     // In this example, we are assuming you have a model called Person, but you can
     // replace it with any model in your project.
+    var self = this;
 	Bulkhead.service.call(this, 'Account', {
 	    'number': function(criteria, next) {
 	    	self.getModel.findByAge(criteria, next);
@@ -208,7 +209,7 @@ In your ```config/bootstrap.js```, replace the default ```cb()``` with:
 require('bulkhead').bootstrap.load(sails, cb)
 ```
 
-This will load any properly configured Bulhead package as a SailsJS plugin.
+This will load any properly configured Bulkhead package as a SailsJS plugin.
 
 #### Configuration
 
@@ -219,3 +220,25 @@ To have an NPM package load as a SailsJS plugin, the following rules must be fol
 - To plugin an NPM package's configuration, your NPM package must contain a ```config``` folder like a SailsJS project containing the various JavaScript files you want merged into the cooresponding property of the ```sails``` global object.  These JavaScript files should export objects the same way a SailsJS project handles its own configuration.
 - The NPM package must contain at least one service in its ```api/services``` folder that mixes in with a Bulkhead service via ```Bulkhead.service.call(this);```  (See above)
 - This service must be ```require()```d in the SailsJS app for the rest of its NPM package to be plugged in.  For ease, the ```main``` property in the ```package.json``` of your NPM package should be the path of the service file.
+
+#### Create a boilerplate package
+
+Bulkhead comes with a simple script that will quickly create your Bulkhead package for you.
+
+```
+./createPackage
+```
+
+This will do the following:
+
+- Create a new Github repository for your Bulkhead package.
+- Create a ```master``` and ```develop``` branch in the repository.
+- Create a ```LICENSE``` file.
+- Create a ```README.md``` stub.
+- Create a ```.gitignore``` file.
+- Create a stub test.
+- Create a stub service for you.
+- Populate the ```package.json``` for NPM including mapping the package to your stub service.
+- Install the ```bulkhead```, ```bulkhead-test```, and ```async``` packages for you.
+- Provide you with instructions on how to move forward when you are ready to release.
+- Configure testing for the package to be ran via ```npm test```
