@@ -1,7 +1,7 @@
 {
   "name": "bulkhead",
   "version": "0.0.3",
-  "description": "Bulkhead is a library that helps programmers create \"units of work\" for SailsJS projects.",
+  "description": "Bulkhead is a library that helps programmers embrace service-oriented programming by allowing NPM packages to act as SailsJS plugins.",
   "main": "index.js",
   "scripts": {
     "test": "NODE_ENV=test node_modules/.bin/mocha test --recursive"
@@ -13,10 +13,23 @@
   "keywords": [
     "sailsjs",
     "soa",
-    "soap",
     "rest",
     "api",
-    "services"
+    "service",
+    "services",
+    "crud",
+    "plugin",
+    "plugins",
+    "sails",
+    "search",
+    "searches",
+    "searching",
+    "bluebird",
+    "promise",
+    "promises",
+    "q",
+    "npm as plugin",
+    "package as plugin"
   ],
   "author": "Patrick Ryan <patrick.ryan@codeotter.com>",
   "license": "GPL v2",
