@@ -1,113 +1,50 @@
 Bulkhead
 ========
 
-Bulkhead is a library that helps programmers compartmentalize their SailsJS project into "units of work".
+Bulkhead is a library that helps programmers compartmentalize their SailsJS project into "units of work".  Bulkhead makes service-oriented programming much easier to embrace in SailsJS with a Service mixin that:
 
-MVC frameworks are inherently incomplete in their approach separation of concern.  Important business logic tends to get distributed randomly between controllers and models.  This makes unit testing, future scaling, and job distribution much more difficult to implement.  To help mitigate this, many MVC frameworks incorporate services as agnostic containers of logic, but these tend to play second fiddle to the more common practice of having the controller wear multiple hats.
+- Provides common CRUD activities for a SailsJS model.
+- Provides the ability to update, delete, and search models with recursive datatype-driven criteria.
+- Standardizing responses to allow SailsJS to easily leverage stateless job distribution via message queues.
+- Converts a service into a promise chain via [Bluebird](https://github.com/petkaantonov/bluebird).
+- Treat a NPM package like a SailsJS plug-in.
 
-Bulkhead makes service-oriented programming much easier to embrace in SailsJS with a Service mixin that:
-
-- Contains common CRUD activities.
-- Performs searches with recursive datatype-driven criteria.
-- Standardizing responses in a distributed message queue-friendly format.
-- A Testing Harness for Mocha that makes it easier to write tests.
-
-Getting started
----------------
+## Installation
 
 ```
 npm install bulkhead
 ```
 
-An example of a service that handles basic CRUD functionality for Account models:
+## Getting Started
+
+Bulkhead is service-oriented, so we must create a service to properly use it.  In your ```api/services``` folder, create a new service called ```TestService.js``` and populate it with:
 
 ```javascript
-// AccountService.js
+// api/services/TestService.js
 
-var bulkhead = require('bulkhead');
+var Bulkhead = require('bulkhead');
 
 module.exports = new function() {
-
-	var self = this;
-	bulkhead.service.call(this, 'Account');
+    // In this example, we are assuming you have a model called Person, but you can
+    // replace it with any model in your project.
+	Bulkhead.service.call(this, 'Person');
 };
 ```
 
-Search Functionality
---------------------
+## Philosophy
 
-The power of Bulkhead is in the ```.find()``` method.  For example, this will find an account with an ID of 1.  Assuming we've done this:
+MVC frameworks are inherently incomplete in their approach separation of concern.  Important business logic tends to get distributed randomly between controllers and models.  This makes unit testing, future scaling, and job distribution much more difficult to implement.  To help mitigate this, many MVC frameworks incorporate services as agnostic containers of logic, but these tend to play second fiddle to the more common practice of having the controller wear multiple hats.
+
+To incentivize service-oriented programming for SailsJS projects, Bulkhead comes with a variety of extremely helpful tools to let people make the switch and quickly reap the rewards.
+
+### Bulkhead Service
+Now, to demonstrate the usefulness of a Bulkhead service, we create two callbacks:
 
 ```javascript
-var accountService = require('./accountService');
-
 // A handler that will display the results of a service action
 var done = function(err, result) {
+    if(err) throw err;
 	console.log(result.response());
-};
-```
-
-We can search for accounts by their ID.
-
-```javascript
-accountService.find(1, done);
-```
-
-This will find an account by its name.
-
-```javascript
-accountService.find('bob', done);
-```
-
-This will perform a query on the Account model:
-
-```javascript
-accountService.find({ email: 'test@test', password: 'secret' }, done);
-```
-
-And... you can do all of these searches at the same time via criteria batching. :D
-
-```javascript
-accountService.find([ 1, 'bob', { email: 'test@test', password: 'secret' }], done);
-```
-
-This is incredibly useful in a stateless environment as it reduces the complexity of having to guess what contexts and data you'll have in unpredictable use cases.
-
-This criteria batching also works in the ```.update()``` and ```.remove()```, allowing you to mass edit and delete multiple records easily.
-
-Advanced Search Functionality
------------------------------
-
-Let's assume that when we search by a string, we want to search email addresses and not names.  Now lets say when we search by number, we wish to search by age instead of ID.
-
-To override this default functionality, we define our criteria map at mixin time:
-
-```javascript
-	Service.call(this, 'Account', {
-	    'number': function(criteria, next) {
-	    	self.getModel.findByAge(criteria, next);
-	    },
-		'string': function(criteria, next) {
-			self.getModel().findOneByEmail(criteria, next);
-		}
-	});
-```
-
-Now when we search by a number, it will search by age and when we search with a string, it will search by email.
-
-CRUD Functionality
-------------------
-
-For the ease of demonstration, lets create some common handlers ahead of time:
-
-```javascript
-// This will generate a standard reponse
-var package = function(err, result) {
-	// Post-save result packaging
-	if(err)
-		return self.result(false, done, null, null, err);
-
-	return self.result(result, done);
 };
 
 // This validation will be called every time a change is persisted to the Account model
@@ -115,85 +52,119 @@ var validation = function(data, next) {
 	// Pre-save validation
 	var errors = [];
 
-	if(data.email == '') {
-		errors.push('Email is required');
+	if(data.firstName == '') {
+		errors.push('First Name is required');
 	}
 	
-	if(data.password == '') {
-		errors.push('Password is required');
+	if(data.lastName == '') {
+		errors.push('Last Name is required');
 	}
 
 	next(errors.length > 0 ? errors : null, data);
 };
 ```
 
-This will allow us to validate a new account, save it to your database, and prepare a result package:
+And below is a list of what methods your service has access to:
 
 ```javascript
-accountService.create({
-	email: 'test@test.com',
-	password: 'secret'
-}, validation, package);
+// Finds a Person with an ID of 1
+TestSevice.find(1, done);
+
+// Finds a Person with a first name of 'bob'
+TestSevice.find('bob', done);
+
+// Finds a Person with a first name of 'bob' and a last name of 'smith'
+TestSevice.find({ firstName: 'bob', lastName: 'smith' }, done);
+
+// Allows for criteria batching by finding a Person with a first name of 'bob', a last name of 'smith', and an ID of 1.
+TestSevice.find([ 1, 'bob', { lastName: 'smith' }], done);
+
+// Creates a person with a first name of 'bob' and a last name of 'smith'
+TestService.create({ firstName: 'bob', lastName: 'smith' }, validation, done);
+
+// Changes the first name to 'john' of the Person with an ID of 1
+TestService.update(1, { firstName: 'john' }, validation, done);
+
+// Changes the first name to 'john' of all Persons with an ID of 1, the first name of 'bob', and the last name of 'smith' (Criteria batching)
+TestService.update([ 1, 'bob', { lastName: 'smith' }], { firstName: 'john' }, validation, done);
+
+// Removes a Person with an ID of 1
+TestService.remove(1, done);
+
+// Removes all Persons with an ID of 1, the first name of 'bob', and the last name of 'smith' (Criteria batching)
+TestService.remove([ 1, 'bob', { lastName: 'smith' }], done);
+
+// Creates promise-versions of  the CRUD functionality
+TestService.asPromise();
+
+// Creates a person with a first name of 'bob' and a last name of 'smith'. (Criteria batching also possible)
+TestService.createPromise({ firstName: 'bob', lastName: 'smith' }).then(done);
+
+// Changes the first name to 'john' of the Person with an ID of 1 (Criteria batching also possible)
+TestService.updatePromise(1, { firstName: 'john' }, validation).then(done);
+
+// Removes a Person with an ID of 1 (Criteria batching also possible)
+TestService.removePromise(1).then(done);
+
+// Finds a Person with an ID of 1 (Criteria batching also possible)
+TestService.findPromise(1).then(done);
+
+// Generates a Bulkhead Response with a result of 1.  (See below)
+TestService.result([1]);
+
+// Returns the Person model
+TestService.getModel();
 ```
 
-This performs an update
+## Advanced Bulkhead Usage
+--------------------------
+### Datatype Criteria Mapping
+
+Let's assume that when we search by a string, we want to search by last name and not first names.  Now lets say when we search by number, we wish to search by age instead of ID.
+
+To override this default functionality, we define our criteria map at mixin time:
 
 ```javascript
-accountService.update(1, { 
-	email: 'stillATest@test.com'
-}, validation, package);
+var Bulkhead = require('bulkhead');
+
+module.exports = new function() {
+    // In this example, we are assuming you have a model called Person, but you can
+    // replace it with any model in your project.
+	Bulkhead.service.call(this, 'Account', {
+	    'number': function(criteria, next) {
+	    	self.getModel.findByAge(criteria, next);
+	    },
+		'string': function(criteria, next) {
+			self.getModel().findByLastName(criteria, next);
+		}
+	});
+};
 ```
 
-This will perform a mass update:
+Now when we search by a number, it will search by age and when we search with a string, it will search by last name.
+
+### Service Responses
+
+To ease in preserving statefulness between stateless services, (For example, passing jobs, their immediate scope AND their arguments into a message queue) the methods of a Bulkhead service should always return a Response.  The ```.result()``` helper assists with this process.  The argument list is as followed:
 
 ```javascript
-accountService.update([1, 2, 3, 4, 'test@test.com', 'contact@codeotter.com'] { 
-	email: 'stillATest@test.com'
-}, validation, package);
-```
-
-This will delete an account
-
-```javascript
-accountService.remove(1, package);
-```
-
-This will delete multiple accounts
-
-```javascript
-accountService.remove([1, 2, 3, 4, 'test@test.com', 'contact@codeotter.com'], package);
-```
-
-This will return the SailsJS ORM Model the service is controlling
-
-```javascript
-accountService.getModel();
-```
-
-Response Package
----------------
-
-To ease in preserving statefulness between stateless services, (For example, passing jobs AND their arguments into a queue) 
-Bulkhead services should return a Result package.  The ```.result()``` helper assists with this process.  The argument list is as followed:
-
-```javascript
-accountService.result(
-	'The result you want to package',
+TestService.result(
+	'The array of results you want to package.',
 	function(err, result) {
 		// The callback to fire once the Result package is created.
 		if(err) throw err;
 		console.log(result.response());
 	}, 
-	'Criteria you used to get the result',
-	'Custom message or warning associated with this result',
-	'Errors get added here'
+	'Criteria you used to get this result',
+	'An array of custom messages or warnings associated with this result',
+	'Errors get added to this parameters'
 );
 ```
 
 Generally, your methods will return a positive result, which would look like:
 
 ```javascript
-accountService.result(
+TestService.result(
 	'2',
 	done, 
 	'1+1=?'
@@ -203,11 +174,11 @@ accountService.result(
 Occasionally messages or additional metadata needs to be attached to the response:
 
 ```javascript
-accountService.result(
+TestService.result(
 	'2',
 	done, 
 	'1+1=?',
-	'Metadata note: I love doing math :)'
+	['Metadata note: I love doing math :)']
 );
 ```
 
@@ -215,7 +186,7 @@ And regarding errors, pass them into the fifth argument:
 
 ```javascript
 // An example of a response package with an error
-accountService.result(
+TestService.result(
 	'3',
 	done, 
 	'1+1=?',
@@ -224,19 +195,27 @@ accountService.result(
 );
 ```
 
-Promisification
----------------
+### NPM Packages as SailsJS Plugins
+___(This section is currently experimental)___
 
-Utilizing Bluebird, all services can be turned into promise generators by doing:
+Treating NPM packages like SailsJS plugins make development more modular, scalable, and easier to deploy in SOA environments.
 
-```javascript
-accountService.asPromise()
+#### Getting started
+
+In your ```config/bootstrap.js```, replace the default ```cb()``` with:
+
+```
+require('bulkhead').bootstrap.load(sails, cb)
 ```
 
-This only needs to be executed one and the service will create new methods that return promises based on the same name of existing methods 
-(But with a suffix of 'Promise').  So, for example, after running ```accountService.asPromise()```, you'll have access to:
+This will load any properly configured Bulhead package as a SailsJS plugin.
 
-- ```findPromise()```
-- ```createPromise()```
-- ```updatePromise()```
-- ```removePromise()```
+#### Configuration
+
+To have an NPM package load as a SailsJS plugin, the following rules must be followed:
+
+- Your ```config/bootstrap.js``` must be modified.  (See above)
+- Your NPM package must contain an ```api``` folder like a SailJS project.  This folder should contain subfolders of ```models```, ```services```, ```policies```, ```adapters```, ```controllers```, ```hooks```, ```blueprints```, and ```responses```, each containing the various JavaScript files you want merged into the cooresponding property of the ```sails``` global object.  These JavaScript files should export objects the same way a SailsJS project handles these subfolders.
+- To plugin an NPM package's configuration, your NPM package must contain a ```config``` folder like a SailsJS project containing the various JavaScript files you want merged into the cooresponding property of the ```sails``` global object.  These JavaScript files should export objects the same way a SailsJS project handles its own configuration.
+- The NPM package must contain at least one service in its ```api/services``` folder that mixes in with a Bulkhead service via ```Bulkhead.service.call(this);```  (See above)
+- This service must be ```require()```d in the SailsJS app for the rest of its NPM package to be plugged in.  For ease, the ```main``` property in the ```package.json``` of your NPM package should be the path of the service file.
