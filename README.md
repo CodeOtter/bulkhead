@@ -234,7 +234,7 @@ This will do the following:
 - Create a new Github repository for your Bulkhead package.
 - Create a ```master``` and ```develop``` branch in the repository.
 - Create a ```LICENSE``` file.
-- Create a ```README.md``` stub.
+- Create a ```README.md``` stub with installation instructions.
 - Create a ```.gitignore``` file.
 - Create a stub test.
 - Create a stub service for you.
