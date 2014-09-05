@@ -9,9 +9,6 @@ module.exports = {
 	// Individual elements of a Response.  Used most commonly in a findAndDo. 
 	result: require('./lib/Result.js'),
 	
-	// The Bootstrap object controls the registration and loading of NPM packages.
-	bootstrap: require('./lib/Bootstrap.js'),
-	
-	// The Plugin system solves namespacing and versioning problems by allowing registration and access to specific versions of Bulkhead Packages.
-	plugin: require('./lib/Plugin.js')
+	// The Plugin object controls the registration and loading of NPM packages.
+	plugins: require('./lib/Plugin.js')
 };

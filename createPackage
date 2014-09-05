@@ -9,6 +9,7 @@ git init
 
 mkdir api
 mkdir api/services
+
 cat << EOT > api/services/Service.js
 var Bulkhead = require('bulkhead'),
 	async = require('async');
@@ -37,11 +38,15 @@ describe('$project Test', function() {
 });
 EOT
 
+cat <<EOT > index.js
+require('bulkhead').plugins.register();
+EOT
+
 cat <<EOT > package.json
 {
   "name": "$project",
   "version": "0.0.0",
-  "main": "api/service/Service.js",
+  "main": "index.js",
   "description": "A Bulkhead service",
   "author": "$username",
   "scripts": {
