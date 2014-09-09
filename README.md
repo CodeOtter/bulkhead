@@ -244,3 +244,67 @@ This will do the following:
 - Install the ```bulkhead```, ```bulkhead-test```, and ```async``` packages for your new package.
 - Provide you with instructions on how to move forward when you are ready to release.
 - Configure testing for the package to be ran via ```npm test```
+
+#### Accessing your package components
+
+Because Bulkhead is service-oriented, the services are the workhorse of a package.  Assuming we had a file structure like this:
+
+```
+testPackage
+    |
+    +- api
+    |   |
+    |   +- models
+    |   |   |
+    |   |   +- Account.js
+    |   |
+    |   +- services
+    |       |
+    |       +- TestService.js
+    |       |
+    |       +- OtherService.js
+    |
+    +- config
+        |
+        +- test.js
+```
+
+To access these components, we can do the following in a service method:
+
+```javascript
+// api/services/TestService.js
+
+var Bulkhead = require('bulkhead');
+
+module.exports = new function() {
+    Bulkhead.service.call(this, 'Account');
+
+    this.someMethod = function() {
+
+    	// These are all the ways to access the Account model
+        this.plugin.models.account;
+        this.plugin.Account;
+        sails.models['testPackage_account'];
+        global['testPackage_Account'];
+
+		// These are all the ways to access the TestService
+        this.plugin.services.testservice;
+        this.plugin.TestService;
+        sails.services['testPackage_testservice'];
+        global['testPackage_TestService'];
+
+        // These are all the ways to access the OtherService
+        this.plugin.services.otherservice;
+        this.plugin.OtherService;
+        sails.services['testPackage_otherservice'];
+        global['testPackage_OtherService'];
+        
+    };
+};
+```
+
+In the database, all tables referred to in models will be given namespaced prefixes, so to access the table in MySQL for example:
+
+```
+SELECT * FROM testPackage_account;
+```
