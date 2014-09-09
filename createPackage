@@ -45,7 +45,7 @@ EOT
 cat <<EOT > package.json
 {
   "name": "$project",
-  "version": "0.0.0",
+  "version": "0.0.1",
   "main": "index.js",
   "description": "A Bulkhead service",
   "author": "$username",
@@ -72,14 +72,24 @@ A Bulkhead package.
 
 ## Installation
 
-\`\`\`
-npm install bulkhead
-\`\`\`
-
-And for SailsJS, in your \`\`\`config/bootstrap.js\`\`\`, replace the default \`\`\`cb()\`\`\` with:
+In your Sails application directory, type:
 
 \`\`\`
-require('bulkhead').bootstrap.load(sails, cb)
+npm install bulkhead $project
+\`\`\`
+
+And in your \`\`\`config/bootstrap.js\`\`\` file, replace the default \`\`\`cb()\`\`\` with:
+
+\`\`\`
+require('bulkhead').plugins.initialize(sails, cb);
+
+## Configuration
+
+TODO
+
+## Example Usage
+
+TODO
 \`\`\`
 EOT
 
@@ -106,10 +116,8 @@ echo "==========================================================================
 echo "git checkout master"
 echo "git merge develop"
 echo "git push"
-echo "git tag 0.0.0"
+echo "git tag 0.0.1"
 echo "git push --tags"
 echo "npm publish"
 echo "git checkout develop"
 echo "================================================================================"
-echo "You can access your project with:"
-echo "cd ~/$project"

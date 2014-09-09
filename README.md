@@ -17,7 +17,7 @@ npm install bulkhead
 
 ## Getting Started
 
-Bulkhead is service-oriented, so we must create a service to properly use it.  In your ```api/services``` folder, create a new service called ```TestService.js``` and populate it with:
+Bulkhead is service-oriented, so we must create a service to properly use it.  In the ```api/services``` folder of your Sails application, create a new service called ```TestService.js``` and populate it with:
 
 ```javascript
 // api/services/TestService.js
@@ -199,11 +199,11 @@ TestService.result(
 ### NPM Packages as SailsJS Plugins
 ___(This section is currently experimental)___
 
-Treating NPM packages like SailsJS plugins make development more modular, scalable, and easier to deploy in SOA environments.
+In addition to providing extendable functionality to Sails services, Bulkhead also allows you to treat NPM packages as SailsJS plugins to make development more modular, scalable, and easier to deploy in SOA environments.
 
 #### Getting started
 
-In your ```config/bootstrap.js```, replace the default ```cb()``` with:
+In the ```config/bootstrap.js``` of your Sails application, replace the default ```cb()``` with:
 
 ```
 require('bulkhead').plugins.initialize(sails, cb);
@@ -216,10 +216,10 @@ This will load all registered Bulkhead packages as namespace-safe SailsJS plugin
 To have an NPM package load as a SailsJS plugin, the following rules must be followed:
 
 - Your ```config/bootstrap.js``` must be modified.  (See above)
-- Your NPM package must contain an ```api``` folder like a SailJS project.  This folder should contain subfolders of ```models```, ```services```, ```policies```, ```adapters```, ```controllers```, ```hooks```, ```blueprints```, and ```responses```, each containing the various JavaScript files you want merged into the cooresponding property of the ```sails``` global object.  These JavaScript files should export objects the same way a SailsJS project handles these subfolders.
+- Your NPM package must contain an ```api``` folder like a SailJS project.  This folder should contain subfolders of ```models```, ```services```, ```policies```, ```adapters```, ```controllers```, ```hooks```, ```blueprints```, and ```responses```, each containing the various JavaScript files you want merged into the cooresponding property of the ```sails``` global object.  These JavaScript files should export objects the same way a SailsJS project handles such subfolders.
 - To plugin an NPM package's configuration, your NPM package must contain a ```config``` folder like a SailsJS project containing the various JavaScript files you want merged into the cooresponding property of the ```sails``` global object.  These JavaScript files should export objects the same way a SailsJS project handles its own configuration.
 - The NPM package must contain at least one service in its ```api/services``` folder named ```Service.js``` that mixes in with a Bulkhead service via ```Bulkhead.service.call(this);```  (See above)
-- This service must be ```require()```d in the SailsJS app for the rest of its NPM package to be plugged in.  For ease, the ```main``` property in the ```package.json``` of your NPM package should be the path of the service file.
+- This service must be ```require()```d in the SailsJS app for the rest of its NPM package to be plugged in.
 - The NPM package must contain an ```index.js``` file that has ```require('bulkhead').plugins.register()```;
 - The NPM package must have the ```main``` property in its ```package.json``` set to ```index.js```
 
