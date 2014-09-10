@@ -1,0 +1,180 @@
+cd ~
+
+echo "What is the name of the project?"
+read project
+
+echo "What is your GitHub username?"
+read username
+
+curl --silent -u "$username" https://api.github.com/user/repos -d "{\"name\":\"$project\"}" >/dev/null
+
+sails new $project
+
+cd ~/$project
+git init
+
+cat <<EOT > package.json
+{
+  "name": "$project",
+  "version": "0.0.1",
+  "main": "app.js",
+  "description": "A Bulkhead project",
+  "author": "$username",
+  "dependencies": {
+    "sails": "~0.10.4",
+    "sails-disk": "~0.10.0",
+    "rc": "~0.5.0",
+    "include-all": "~0.1.3",
+    "ejs": "~0.8.4",
+    "grunt": "0.4.2",
+    "grunt-sync": "~0.0.4",
+    "grunt-contrib-copy": "~0.5.0",
+    "grunt-contrib-clean": "~0.5.0",
+    "grunt-contrib-concat": "~0.3.0",
+    "grunt-sails-linker": "~0.9.5",
+    "grunt-contrib-jst": "~0.6.0",
+    "grunt-contrib-watch": "~0.5.3",
+    "grunt-contrib-uglify": "~0.4.0",
+    "grunt-contrib-cssmin": "~0.9.0",
+    "grunt-contrib-less": "0.11.1",
+    "grunt-contrib-coffee": "~0.10.1"
+  },
+  "scripts": {
+    "preinstall": "",
+    "start": "forever start app.js --prod --port 80",
+    "debug": "node debug app.js",
+    "test": "NODE_ENV=test node_modules/bulkhead-test/node_modules/mocha/bin/mocha test --recursive"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/$username/$project.git"
+  },
+  "license": "GPL v2",
+  "bugs": {
+    "url": "https://github.com/$username/$project/issues"
+  },
+  "homepage": "https://github.com/$username/$project"
+}
+EOT
+
+mkdir test
+mkdir test/fixtures
+cat <<EOT > test/Test.js
+var Suite = require('bulkhead-test'),
+	assert = require('assert');
+
+describe('$project Test', function() {
+	Suite.lift();
+	describe('General test', function() {
+		it('should fail because there is no custom test', function(done) {
+			assert.fail('Please create tests :D');
+		});
+	});
+});
+EOT
+
+cat <<EOT > config/bootstrap.js
+module.exports.bootstrap = function (cb) {
+    require('bulkhead').plugins.initialize(sails, cb);
+};
+EOT
+
+echo "What is your database host?"
+read dbHost
+echo "What is your database username?"
+read dbUser
+echo "What is your database password?"
+read -s dbPass
+
+cat <<EOT > config/env/development.js
+module.exports = {
+  connections: {
+    mysql: {
+      adapter : 'sails-mysql',
+      host    : '$dbHost',
+      user    : '$dbUser',
+      password: '$dbPass', 
+      database: '$project'
+    },
+    test: {
+      adapter : 'sails-mysql',
+      host    : '$dbHost',
+      user    : '$dbUser',
+      password: '$dbPass', 
+      database: 'test'
+    }
+  },
+  models: {
+    connection: 'mysql',
+    migrate: 'alter'
+  }
+}
+EOT
+
+cat <<EOT > config/env/production.js
+module.exports = {
+
+  blueprints: {
+    actions: false,
+    rest: false,
+    shortcuts: false,
+    prefix: '',
+    pluralize: false,
+    populate: true,
+    autoWatch: true,
+    defaultLimit: 30
+  }
+
+  connections: {
+    mysql: {
+      adapter : 'sails-mysql',
+      host    : '$dbHost',
+      user    : '$dbUser',
+      password: '$dbPass', 
+      database: '$project'
+    }
+  },
+
+  models: {
+    connection: 'mysql',
+    migrate: 'alter'
+  }
+};
+EOT
+
+cat <<EOT > README.md
+$project
+========
+
+A Bulkhead project.
+EOT
+
+npm install bulkhead sails-mysql connect-redis@1.4.5 --save
+npm install bulkhead-test --save-dev
+curl --silent -O https://raw.githubusercontent.com/CodeOtter/bulkhead/master/.gitignore > /dev/null
+curl --silent -O https://raw.githubusercontent.com/CodeOtter/bulkhead/master/LICENSE > /dev/null
+
+git add .
+git commit -m "Boilerplate commit"
+git remote add origin git@github.com:$username/$project.git
+git push -u origin master
+git checkout -b develop
+git merge master
+git push -u origin develop
+git checkout develop
+
+echo ""
+echo "================================================================================"
+echo "$project has been successfully made.  Your Github project is in a develop branch."
+echo "When you are ready to release your package, push all your changes to develop," 
+echo "then follow these instructions:"
+echo "================================================================================"
+echo "git checkout master"
+echo "git merge develop"
+echo "git push"
+echo "git tag 0.0.1"
+echo "git push --tags"
+echo "npm publish"
+echo "git checkout develop"
+echo "================================================================================"
+echo "You can access your project with cd ~/$project"
