@@ -60,11 +60,11 @@ EOT
 mkdir test
 mkdir test/fixtures
 cat <<EOT > test/Test.js
-var Suite = require('bulkhead-test'),
+var suite = require('bulkhead-test'),
 	assert = require('assert');
 
 describe('$project Test', function() {
-	Suite.lift();
+	suite.lift();
 	describe('General test', function() {
 		it('should fail because there is no custom test', function(done) {
 			assert.fail('Please create tests :D');
@@ -92,23 +92,17 @@ module.exports = {
     mysql: {
       adapter : 'sails-mysql',
       host    : '$dbHost',
-      user    : '$dbUser',
+      user    : '$dbName',
       password: '$dbPass', 
       database: '$project'
-    },
-    test: {
-      adapter : 'sails-mysql',
-      host    : '$dbHost',
-      user    : '$dbUser',
-      password: '$dbPass', 
-      database: 'test'
     }
   },
   models: {
     connection: 'mysql',
     migrate: 'alter'
   }
-}
+};
+
 EOT
 
 cat <<EOT > config/env/production.js
@@ -141,6 +135,29 @@ module.exports = {
   }
 };
 EOT
+
+cat <<EOT > config/env/test.js
+module.exports = {
+  connections: {
+    test: {
+      adapter : 'sails-mysql',
+      host    : '$dbHost',
+      user    : '$dbUser',
+      password: '$dbPass', 
+      database: 'test'
+    }
+  },
+  models: {
+    connection: 'test',
+    migrate: 'alter'
+  },
+  log: {
+    level: 'error'
+  },
+  hooks: {
+    grunt: false
+  }
+};
 
 cat <<EOT > README.md
 $project
