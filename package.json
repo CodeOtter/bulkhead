@@ -1,6 +1,6 @@
 {
   "name": "bulkhead",
-  "version": "0.0.6",
+  "version": "0.0.7",
   "description": "Bulkhead is a library that helps programmers embrace service-oriented programming by allowing NPM packages to act as SailsJS plugins.",
   "main": "index.js",
   "scripts": {
