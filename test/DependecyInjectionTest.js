@@ -5,7 +5,7 @@ var Service = require('../lib/Service'),
 	assert = require('assert');
 
 describe('Dependency Injection', function() {
-	describe.only('Base Class', function() {
+	describe('Base Class', function() {
 		it('should construct and instantiate', function(done) {
 			DI(new Service())();
 			done();
