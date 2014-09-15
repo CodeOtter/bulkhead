@@ -1,10 +1,10 @@
-echo "What is the name of the project?"
-read project
+echo "What is the name of the plugin?"
+read plugin
 echo "What is your GitHub username?"
 read username
-curl --silent -u "$username" https://api.github.com/user/repos -d "{\"name\":\"$project\"}" >/dev/null
-git clone git@github.com:$username/$project.git ~/$project
-cd ~/$project
+curl --silent -u "$username" https://api.github.com/user/repos -d "{\"name\":\"$plugin\"}" >/dev/null
+git clone git@github.com:$username/$plugin.git ~/$plugin
+cd ~/$plugin
 git init
 
 mkdir api
@@ -15,7 +15,7 @@ var Bulkhead = require('bulkhead'),
 	async = require('async');
 
 /**
- * The main service for the $project project.
+ * The main service for the $plugin plugin.
  */
 module.exports = new function(){
 	var self = this;
@@ -24,11 +24,12 @@ module.exports = new function(){
 EOT
 
 mkdir test
+mkdir test/fixtures
 cat <<EOT > test/Test.js
 var Suite = require('bulkhead-test'),
 	assert = require('assert');
 
-describe('$project Test', function() {
+describe('$plugin Test', function() {
 	Suite.lift();
 	describe('General test', function() {
 		it('should fail because there is no custom test', function(done) {
@@ -44,7 +45,7 @@ EOT
 
 cat <<EOT > package.json
 {
-  "name": "$project",
+  "name": "$plugin",
   "version": "0.0.1",
   "main": "index.js",
   "description": "A Bulkhead service",
@@ -54,18 +55,18 @@ cat <<EOT > package.json
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/$username/$project.git"
+    "url": "https://github.com/$username/$plugin.git"
   },
   "license": "GPL v2",
   "bugs": {
-    "url": "https://github.com/$username/$project/issues"
+    "url": "https://github.com/$username/$plugin/issues"
   },
-  "homepage": "https://github.com/$username/$project"
+  "homepage": "https://github.com/$username/$plugin"
 }
 EOT
 
 cat <<EOT > README.md
-$project
+$plugin
 ========
 
 A Bulkhead package.
@@ -75,7 +76,7 @@ A Bulkhead package.
 In your Sails application directory, type:
 
 \`\`\`
-npm install bulkhead $project
+npm install bulkhead $plugin
 \`\`\`
 
 And in your \`\`\`config/bootstrap.js\`\`\` file, replace the default \`\`\`cb()\`\`\` with:
@@ -109,7 +110,7 @@ git checkout develop
 
 echo ""
 echo "================================================================================"
-echo "$project has been successfully made.  Your Github project is in a develop branch."
+echo "$plugin has been successfully made.  Your Github plugin is in a develop branch."
 echo "When you are ready to release your package, push all your changes to develop," 
 echo "then follow these instructions:"
 echo "================================================================================"
@@ -121,3 +122,4 @@ echo "git push --tags"
 echo "npm publish"
 echo "git checkout develop"
 echo "================================================================================"
+echo "You can access your plugin with cd ~/$plugin"

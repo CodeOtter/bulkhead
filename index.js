@@ -10,5 +10,8 @@ module.exports = {
 	result: require('./lib/Result.js'),
 	
 	// The Plugin object controls the registration and loading of NPM packages.
-	plugins: require('./lib/Plugin.js')
+	plugins: require('./lib/Plugin.js'),
+	
+	// The Dependency Injection container
+	dic: require('./lib/DependencyInjection.js')
 };
